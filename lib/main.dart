@@ -27,6 +27,27 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String res = "";
 
+  Future <void> fetchgetData() async {
+    final url = Uri.parse('http://172.20.10.4:5001/secure-data');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer my_secret_key',
+      }
+    );
+
+    setState(() {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print("收到資料：${data['message']}");
+        res = data['message'];
+      } else {
+        print("錯誤：${response.statusCode}");
+        res = "error";
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    
+                    fetchgetData();
                   },
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.all(10),
