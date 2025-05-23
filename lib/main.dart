@@ -28,12 +28,41 @@ class _HomeScreenState extends State<HomeScreen> {
   String res = "";
 
   Future <void> fetchgetData() async {
-    final url = Uri.parse('http://172.20.10.4:5001/secure-data');
+    final url = Uri.parse('http://172.20.10.3:5001/secure-data');
     final response = await http.get(
       url,
       headers: {
         'Authorization': 'Bearer my_secret_key',
       }
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      print("收到資料：${data['message']}");
+      setState(() {
+        res = data['message'];
+      });
+    } else {
+      print("錯誤：${response.statusCode}");
+      setState(() {
+        res = "error";
+      });
+    }
+  }
+
+  Future<void> fetchpostData() async {
+    final url = Uri.parse('http://172.20.10.3:5001/login');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer my_secret_key',
+
+      },
+      body: jsonEncode({
+        'username': 'flutter',
+        'password': '123456',
+      }),
     );
 
     setState(() {
@@ -42,8 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
         print("收到資料：${data['message']}");
         res = data['message'];
       } else {
-        print("錯誤：${response.statusCode}");
-        res = "error";
+        final err = jsonDecode(response.body);
+        print("錯誤：${err['message']}");
+        res = "錯誤：${err['message']}";
       }
     });
   }
@@ -94,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 ElevatedButton(
                   onPressed: () {
-                    
+                    fetchpostData();
                   },
                   style: ElevatedButton.styleFrom(
                     padding: EdgeInsets.all(10),
